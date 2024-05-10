@@ -46,6 +46,9 @@ const Content = styled.div(() => ({
 
 const Button = styled.button(() => ({
   position: 'absolute',
+  //carousel nav buttons have vertically-aligned to the centre
+  top: '50%',
+  transform:' translateY(-50%)',
   bottom: 0,
   backgroundColor: 'rgba(255, 255, 255, 0.5)',
   border: 'none',
@@ -68,8 +71,10 @@ const Post = ({ post }) => {
 
   const handleNextClick = () => {
     if (carouselRef.current) {
+      //functionality added to carousel nav buttons
+      const imageWidth = carouselRef.current.offsetWidth;
       carouselRef.current.scrollBy({
-        left: 50,
+        left: imageWidth,
         behavior: 'smooth',
       });
     }
@@ -77,8 +82,10 @@ const Post = ({ post }) => {
 
   const handlePrevClick = () => {
     if (carouselRef.current) {
+      //functionality added to carousel nav buttons
+      const imageWidth = carouselRef.current.offsetWidth;
       carouselRef.current.scrollBy({
-        left: -70,
+        left: -imageWidth,
         behavior: 'smooth',
       });
     }
