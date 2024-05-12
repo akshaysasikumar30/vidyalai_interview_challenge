@@ -48,7 +48,7 @@ const Button = styled.button(() => ({
   position: 'absolute',
   //carousel nav buttons have vertically-aligned to the centre
   top: '50%',
-  transform:' translateY(-50%)',
+  transform: ' translateY(-50%)',
   bottom: 0,
   backgroundColor: 'rgba(255, 255, 255, 0.5)',
   border: 'none',
@@ -56,6 +56,19 @@ const Button = styled.button(() => ({
   fontSize: '20px',
   cursor: 'pointer',
   height: '50px',
+}));
+
+//icon
+const IconContainer = styled.div(() => ({
+  width: '50px',
+  height: '50px',
+  backgroundColor: 'grey',
+  color: '#fff',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  borderRadius: '50%',
+  fontSize: '24px',
 }));
 
 const PrevButton = styled(Button)`
@@ -94,6 +107,17 @@ const Post = ({ post }) => {
   return (
     <PostContainer>
       <CarouselContainer>
+        <div
+          style={{ display: 'flex', marginInline: '10px', paddingTop: '10px' }}
+        >
+          <div>
+            <IconContainer>AS</IconContainer>
+          </div>
+          <div style={{ paddingLeft: '5px' }}>
+            <h3>Akshay Sasikumar</h3>
+            <span style={{ fontSize: 'small' }}>akshaysasikumar@gmail.com</span>
+          </div>
+        </div>
         <Carousel ref={carouselRef}>
           {post.images.map((image, index) => (
             <CarouselItem key={index}>

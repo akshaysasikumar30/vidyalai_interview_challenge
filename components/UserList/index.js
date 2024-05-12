@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from '@emotion/styled';
 import axios from 'axios';
 
@@ -35,113 +35,89 @@ const columnFields = [
   { value: 'website', label: 'Website' },
 ];
 
-const withUserData = WrappedComponent =>
-  class WithUserData extends Component {
-    state = {
-      users: [],
-      filteredUsers: [],
-      searchName: '',
-      searchEmail: '',
-      sortColumn: columnFields[0].value,
-      sortDirection: 'asc',
+const withUserData = ()=>{
+  const [users, setUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [searchName, setSearchName] = useState('');
+  const [searchEmail, setSearchEmail] = useState('');
+  const [sortColumn, setSortColumn] = useState(columnFields[0].value);
+  const [sortDirection, setSortDirection] = useState('asc');
+  
+  useEffect(() => {
+    const fetchUsers = async () => {
+        const { data } = await axios.get('/api/v1/users');
+        setUsers(data);
+        setFilteredUsers(data);
     };
-
-    async componentDidMount() {
-      const { data: users } = await axios.get('/api/v1/users');
-
-      this.setState({
-        users,
-        filteredUsers: users,
-      });
-    }
-
-    componentDidUpdate(prevProps, prevState) {
-      if (
-        prevState.searchName !== this.state.searchName ||
-        prevState.searchEmail !== this.state.searchEmail ||
-        prevState.users !== this.state.users ||
-        prevState.sortColumn !== this.state.sortColumn ||
-        prevState.sortDirection !== this.state.sortDirection
-      ) {
-        let filteredUsers = this.state.users.filter(
-          user =>
-            user.name
-              .toLowerCase()
-              .includes(this.state.searchName.toLowerCase()) &&
-            user.email
-              .toLowerCase()
-              .includes(this.state.searchEmail.toLowerCase()),
-        );
-
-        if (this.state.sortColumn) {
+    fetchUsers();
+  }, []);
+  useEffect(() => {
+    let filteredUsers = users.filter(
+      user =>
+        user.name.toLowerCase().includes(searchName.toLowerCase()) &&
+        user.email.toLowerCase().includes(searchEmail.toLowerCase())
+    );
+  
+        if (sortColumn) {
           filteredUsers.sort((a, b) => {
-            const x = a[this.state.sortColumn];
-            const y = b[this.state.sortColumn];
-            if (x < y) return this.state.sortDirection === 'asc' ? -1 : 1;
-            if (x > y) return this.state.sortDirection === 'asc' ? 1 : -1;
+            const x = a[sortColumn];
+            const y = b[sortColumn];
+            if (x < y) return sortDirection === 'asc' ? -1 : 1;
+            if (x > y) return sortDirection === 'asc' ? 1 : -1;
             return 0;
           });
         }
 
-        this.setState({ filteredUsers });
-      }
-    }
+        setFilteredUsers(filteredUsers);
+  }, [searchName, searchEmail, sortColumn, sortDirection, users]);
 
-    handleOnSearch = event => {
+   const handleOnSearch = event => {
       let { name, value } = event.target;
 
       if (name === 'name') {
-        name = 'searchName';
+        setSearchName(value);
       } else if (name === 'email') {
-        name = 'searchEmail';
+        setSearchEmail(value);
       } else {
         throw new Error('Unknown search element');
       }
-
-      this.setState({ [name]: value });
     };
 
-    handleSort = column => {
-      if (this.state.sortColumn === column) {
-        this.setState(prevState => ({
-          sortDirection: prevState.sortDirection === 'asc' ? 'desc' : 'asc',
-        }));
+    const handleSort = column => {
+      if (sortColumn === column) {
+        setSortDirection(prevSortDirection => (prevSortDirection === 'asc' ? 'desc' : 'asc'));
       } else {
-        this.setState({ sortColumn: column, sortDirection: 'asc' });
+        setSortColumn(column);
+      setSortDirection('asc');
       }
     };
 
-    render() {
-      return (
-        <WrappedComponent
-          users={this.state.filteredUsers}
-          columnFields={columnFields}
-          handleOnSearch={this.handleOnSearch}
-          handleSort={this.handleSort}
-          sortColumn={this.state.sortColumn}
-          sortDirection={this.state.sortDirection}
-        />
-      );
-    }
+      return {
+  
+        users: filteredUsers,
+        handleOnSearch,
+        handleSort,
+        sortColumn,
+        sortDirection,
+      
+      };
   };
 
-class UserList extends Component {
-  render() {
-    const {
-      users,
-      columnFields,
-      handleOnSearch,
-      handleSort,
-      sortColumn,
-      sortDirection,
-    } = this.props;
+const UserList = () =>{
+  const {
+    users,
+    handleOnSearch,
+    handleSort,
+    sortColumn,
+    sortDirection,
+} = useUserData();
+
     return (
       <div>
         <Table>
           <thead>
             <tr>
-              {columnFields.map(field => {
-                return (
+              {columnFields.map(field => (
                   <th key={field.value}>
                     <div
                       onClick={() => handleSort(field.value)}
@@ -166,8 +142,7 @@ class UserList extends Component {
                       />
                     ) : null}
                   </th>
-                );
-              })}
+              ))}
             </tr>
           </thead>
           <tbody>
@@ -183,7 +158,7 @@ class UserList extends Component {
         <div></div>
       </div>
     );
-  }
-}
+  };
 
-export default withUserData(UserList);
+
+export default UserList;
